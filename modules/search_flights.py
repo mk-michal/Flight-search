@@ -6,13 +6,14 @@ Attributes:
 import datetime
 import requests
 import json
+import logging
 import os
 import sys
 from urllib.parse import urljoin
 
 API_skypicker = 'https://api.skypicker.com/' 
 
-class Flight_info():
+class FlightInfo():
 
 	"""Class that finds different flight options based on costumer preferences.
 	
@@ -32,6 +33,7 @@ class Flight_info():
 		self.departure_date = departure_date
 		self.one_way = one_way
 		self.nights_to_stay = nights_to_stay
+		self.logger = logging.getLogger('Flight search')
 
 	def create_payload(self, cheapest = True) -> dict:
 		"""Method that creates payload based on type of flight, preferences
@@ -74,7 +76,6 @@ class Flight_info():
 				)
 			return flight_request
 		except requests.exceptions.RequestException as e:
-			print (e)
 			sys.exit(1) 
 
 	def pick_cheapest_flight(self) -> dict:
@@ -101,9 +102,9 @@ class Flight_info():
 		"""
 		flights_request = self.request_flights(cheapest = False)
 		if flights_request.status_code != 200:
-			print ('Request failed: Error {}'. format(flights_request.status_code))
+			self.logger.error('Request failed: Error {}'. format(flights_request.status_code))
 		elif not flights_request.json()['data']:
-			print ('No flights were found based on given parameters')
+			self.logger.info('No flights were found based on given parameters')
 		else:
 			return flights_request.json()['data'][0]
 

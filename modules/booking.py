@@ -2,13 +2,16 @@
 Attributes:
     API_booking (str): Booking address API
 """
-import requests
 import datetime
+import logging
+import requests
+
+
 import modules.search_flights as search_flights
 
 API_booking = 'http://128.199.48.38:8080/booking'
 
-class Book_flight():
+class BookFlight():
 
 	"""Class that makes a booking request based of a given API
 	
@@ -32,6 +35,7 @@ class Book_flight():
 		self.email = email
 		self.title = title
 		self.bags = bags
+		self.logger = logging.getLogger('Booking')
 
 	def create_payload(self) -> dict:
 		"""Creates a payload of parameters that is later parse into booking request
@@ -79,7 +83,7 @@ class Book_flight():
 		"""
 		booking_request = self.booking_request()
 		if booking_request.status_code != 200:
-			print ('Request failed: {}'.format(booking_request.content))
+			self.logger.error('Request failed:'.format(booking_request.content))
 		else:
 			return booking_request.json()['pnr']
 

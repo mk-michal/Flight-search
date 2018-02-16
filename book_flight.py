@@ -70,7 +70,6 @@ def validate_departure_airport(ctx, param, value):
 	    str: Three - letter airport IATA code	
 	"""
 	location_request = make_location_request(value) 
-
 	if location_request.status_code != 200:
 		print ('Request failed: Error {}'. format(flights_request.status_code)) 
 	else:
@@ -140,15 +139,15 @@ cheapest:bool, fastest:bool, one_way:bool) -> str:
 	"""
 	one_way = False if nights_to_stay else True
 	if fastest:
-		flight = search_flights.Flight_info(
+		flight = search_flights.FlightInfo(
 			departure, to, date, one_way = one_way, nights_to_stay = nights_to_stay
 			).pick_fastest_flight()
 	else:
-		flight = search_flights.Flight_info(
+		flight = search_flights.FlightInfo(
 			departure, to, date, one_way = one_way, nights_to_stay = nights_to_stay
 			).pick_cheapest_flight()
 
-	confirmation_number = booking.Book_flight(flight['booking_token'], bags = bags).get_confirmation_number()
+	confirmation_number = booking.BookFlight(flight['booking_token'], bags = bags).get_confirmation_number()
 	
 	return click.echo('Reservation number is {}'.format(confirmation_number))
 
