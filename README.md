@@ -3,10 +3,14 @@
 The main goal of the project is to create a script that finds and books flight ticket based on given parameters. Skypicker (Kiwi) API was used for flight search and special API for Kiwi python weekend was used for flight booking (the reason is that this API doesn't require any payment and the booking is ). 
 
 API skypicker:
-```https://api.skypicker.com/```
+``` 
+https://api.skypicker.com/
+ ```
 
 API for booking:
-```http://128.199.48.38:8080/booking```
+```
+http://128.199.48.38:8080/booking
+```
 
 Script is initialized via command line in the following manner:
 

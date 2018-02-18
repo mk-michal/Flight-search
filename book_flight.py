@@ -125,7 +125,7 @@ def validate_arrival_airport(ctx, param, value):
 @click.option('--bags', default = 0, help = 'Number of bags', type = int)
 @click.option('--return','nights_to_stay', default = None, help = 'Number of nights for one stay', type = int)
 @click.option('--cheapest', is_flag = True, default = True, help = 'Find the cheapest flight', type = bool)
-@click.option('--fastest', is_flag = True,  help = 'Find the fastest flight', type = bool)
+@click.option('--fastest'	, is_flag = True,  help = 'Find the fastest flight', type = bool)
 @click.option('--one-way','one_way', is_flag = True, default = True, help = 'Search only one-way flights', type = bool)
 
 
