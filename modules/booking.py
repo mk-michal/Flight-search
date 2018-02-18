@@ -5,13 +5,15 @@ Attributes:
 import datetime
 import logging
 import requests
+import sys
 
 
-import modules.search_flights as search_flights
+from modules import LoggingHandler
 
 API_booking = 'http://128.199.48.38:8080/booking'
 
-class BookFlight():
+
+class BookFlight(LoggingHandler):
 
 	"""Class that makes a booking request based of a given API
 	
@@ -26,16 +28,16 @@ class BookFlight():
 	Deleted Attributes:
 	    flight (str): Booking token for a given flight
 	"""
-	
+		
 	def __init__(self, flight_token:str, name:str = 'Michal', surname:str = 'Kucirka', 
 	email:str = 'michal.kucirka@gmail.com', title:str = 'Mr', bags:int = 0 ):
+		LoggingHandler.__init__(self)
 		self.flight_token = flight_token
 		self.name = name
 		self.surname = surname
 		self.email = email
 		self.title = title
 		self.bags = bags
-		self.logger = logging.getLogger('Booking')
 
 	def create_payload(self) -> dict:
 		"""Creates a payload of parameters that is later parse into booking request
@@ -83,7 +85,8 @@ class BookFlight():
 		"""
 		booking_request = self.booking_request()
 		if booking_request.status_code != 200:
-			self.logger.error('Request failed:'.format(booking_request.content))
+			self.log.error('Booking request failed: Error {}'.format(booking_request.status_code))
+			sys.exit(1)
 		else:
 			return booking_request.json()['pnr']
 

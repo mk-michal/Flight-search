@@ -1,9 +1,11 @@
+#!/usr/bin/env python3
 """Module, that initiate program via command line
 
 Attributes:
-    API_skypicker (str): Kiwi API for making request
+    API_SKYPICKER (str): Kiwi API for making request
 """
 import datetime
+import logging
 import os
 import requests
 
@@ -11,10 +13,12 @@ import requests
 import click
 
 
-from modules import search_flights, booking
+from modules import FlightInfo, BookFlight, LoggingHandler
 
 
-API_skypicker = 'https://api.skypicker.com/' 
+API_SKYPICKER = 'https://api.skypicker.com/'
+
+logger = LoggingHandler().log 
 
 def get_location_payload(location: str, language:str = 'en-US') -> dict:
 	"""Makes a location payload in order to parse it onto location get request
@@ -53,7 +57,7 @@ def make_location_request(location:str):
 
 	payload = get_location_payload(location)
 	try:
-		location_request = requests.get(os.path.join(API_skypicker, 'locations'), params = payload)
+		location_request = requests.get(os.path.join(API_SKYPICKER, 'locations'), params = payload)
 		return location_request
 	except requests.exceptions.RequestException as e:
 		print (e)
@@ -71,7 +75,9 @@ def validate_departure_airport(ctx, param, value):
 	"""
 	location_request = make_location_request(value) 
 	if location_request.status_code != 200:
-		print ('Request failed: Error {}'. format(flights_request.status_code)) 
+		logger.error(
+			'Request failed while requesting arrival airrport:Error {}'. format(location_request.status_code)
+			)
 	else:
 		location_info = location_request.json()['locations']
 		if location_info and location_info[0]['code'] == value:
@@ -97,7 +103,9 @@ def validate_arrival_airport(ctx, param, value):
 	location_request = make_location_request(value) 
 
 	if location_request.status_code != 200:
-		print ('Request failed: Error {}'. format(flights_request.status_code)) 
+		logger.error(
+			'Request failed while requesting arrival airrport: Error {}'. format(location_request.status_code)
+			)
 	else:
 		location_info = location_request.json()['locations']
 		if location_info and location_info[0]['code'] == value:
@@ -118,7 +126,7 @@ def validate_arrival_airport(ctx, param, value):
 @click.option('--return','nights_to_stay', default = None, help = 'Number of nights for one stay', type = int)
 @click.option('--cheapest', is_flag = True, default = True, help = 'Find the cheapest flight', type = bool)
 @click.option('--fastest', is_flag = True,  help = 'Find the fastest flight', type = bool)
-@click.option('--one_way', is_flag = True, default = True, help = 'Search only one-way flights', type = bool)
+@click.option('--one-way','one_way', is_flag = True, default = True, help = 'Search only one-way flights', type = bool)
 
 
 
@@ -139,15 +147,15 @@ cheapest:bool, fastest:bool, one_way:bool) -> str:
 	"""
 	one_way = False if nights_to_stay else True
 	if fastest:
-		flight = search_flights.FlightInfo(
+		flight = FlightInfo(
 			departure, to, date, one_way = one_way, nights_to_stay = nights_to_stay
 			).pick_fastest_flight()
 	else:
-		flight = search_flights.FlightInfo(
+		flight = FlightInfo(
 			departure, to, date, one_way = one_way, nights_to_stay = nights_to_stay
 			).pick_cheapest_flight()
 
-	confirmation_number = booking.BookFlight(flight['booking_token'], bags = bags).get_confirmation_number()
+	confirmation_number = BookFlight(flight['booking_token'], bags = bags).get_confirmation_number()
 	
 	return click.echo('Reservation number is {}'.format(confirmation_number))
 

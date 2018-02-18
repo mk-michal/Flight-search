@@ -13,7 +13,28 @@ from urllib.parse import urljoin
 
 API_skypicker = 'https://api.skypicker.com/' 
 
-class FlightInfo():
+
+class LoggingHandler():
+
+	"""Logger object that is later used in various method
+	
+	Attributes:
+	    format: Logging format
+	    handler: Logging handler
+	    log : Logger
+	"""
+	
+	def __init__(self):
+		"""Summary
+		"""
+		self.format = logging.Formatter('{asctime} {name} {message}', style='{')
+		self.handler = logging.StreamHandler()
+		self.handler.setFormatter(self.format)		
+		self.log = logging.getLogger(self.__class__.__name__)
+		self.log.addHandler(self.handler)
+
+
+class FlightInfo(LoggingHandler):
 
 	"""Class that finds different flight options based on costumer preferences.
 	
@@ -28,6 +49,7 @@ class FlightInfo():
 	
 	def __init__(self, departure_airport: str, arrival_airport: str, departure_date: str, 
 	one_way = True, nights_to_stay: int = None):
+		LoggingHandler.__init__(self)
 		self.departure_airport = departure_airport
 		self.arrival_airport = arrival_airport
 		self.departure_date = departure_date
@@ -86,9 +108,11 @@ class FlightInfo():
 		"""
 		flights_request = self.request_flights()
 		if flights_request.status_code != 200:
-			print ('Request failed: Error {}'. format(flights_request.status_code))
+			self.log.error('Request failed: Error {}'.format(booking_request.status_code))
+			sys.exit(1)			
 		elif not flights_request.json()['data']:
-			print ('No flights were found that match given parameters')
+			self.log.error('No flights were found based on given parameters')
+			sys.exit(1)			
 		else:
 			return flights_request.json()['data'][0]
 
@@ -102,9 +126,12 @@ class FlightInfo():
 		"""
 		flights_request = self.request_flights(cheapest = False)
 		if flights_request.status_code != 200:
-			self.logger.error('Request failed: Error {}'. format(flights_request.status_code))
+			self.log.error('Flight request failed: Error {}'.format(booking_request.status_code))
+			sys.exit(1)
 		elif not flights_request.json()['data']:
-			self.logger.info('No flights were found based on given parameters')
+			self.log.error('No flights were found based on given parameters')
+			sys.exit(1)
+
 		else:
 			return flights_request.json()['data'][0]
 
